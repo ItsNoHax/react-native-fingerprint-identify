@@ -34,11 +34,11 @@ public class RNFingerprintIdentifyModule extends ReactContextBaseJavaModule impl
 
   @ReactMethod
   public void initFingerPrintIdentify(final Promise promise) {
-    if(currentActivity != null) {
-      if(this.mFingerprintIdentify == null) {
-        this.mFingerprintIdentify = new FingerprintIdentify(currentActivity, new BaseFingerprint.FingerprintIdentifyExceptionListener() {
     Activity currentActivity = getCurrentActivity();
+    if (currentActivity != null) {
+      if (mFingerprintIdentify == null) {
         reactContext.addLifecycleEventListener(this);
+        mFingerprintIdentify = new FingerprintIdentify(currentActivity, new BaseFingerprint.FingerprintIdentifyExceptionListener() {
           @Override
           public void onCatchException(Throwable exception) {
             reactContext.removeLifecycleEventListener(RNFingerprintIdentifyModule.this);
