@@ -21,9 +21,6 @@ public class RNFingerprintIdentifyModule extends ReactContextBaseJavaModule {
 
   private final ReactApplicationContext reactContext;
   private FingerprintIdentify mFingerprintIdentify = null;
-  private boolean mIsCalledStartIdentify = false;
-  private Activity currentActivity;
-  private WritableMap response;
 
   public RNFingerprintIdentifyModule(ReactApplicationContext reactContext) {
     super(reactContext);
@@ -37,10 +34,10 @@ public class RNFingerprintIdentifyModule extends ReactContextBaseJavaModule {
 
   @ReactMethod
   public void initFingerPrintIdentify(final Promise promise) {
-    currentActivity = getCurrentActivity();
     if(currentActivity != null) {
       if(this.mFingerprintIdentify == null) {
         this.mFingerprintIdentify = new FingerprintIdentify(currentActivity, new BaseFingerprint.FingerprintIdentifyExceptionListener() {
+    Activity currentActivity = getCurrentActivity();
           @Override
           public void onCatchException(Throwable exception) {
             Log.d("ReactNative", "ERROR FINGERPRINT: " + exception.getLocalizedMessage());
@@ -61,12 +58,6 @@ public class RNFingerprintIdentifyModule extends ReactContextBaseJavaModule {
       return;
     }
 
-    if (mIsCalledStartIdentify) {
-        mFingerprintIdentify.resumeIdentify();
-        return;
-    }
-
-    mIsCalledStartIdentify = true;
     mFingerprintIdentify.resumeIdentify();
     mFingerprintIdentify.startIdentify(6, new BaseFingerprint.FingerprintIdentifyListener() {
       @Override
@@ -140,7 +131,7 @@ public class RNFingerprintIdentifyModule extends ReactContextBaseJavaModule {
   }
 
   private void sendResponse(String status, String message, Promise promise) {
-       response = Arguments.createMap();
+       WritableMap response = Arguments.createMap();
        response.putString("status", status);
        response.putString("error", message);
        promise.resolve(response);
