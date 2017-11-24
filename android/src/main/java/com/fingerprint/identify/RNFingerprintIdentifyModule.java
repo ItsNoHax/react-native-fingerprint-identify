@@ -18,6 +18,7 @@ import android.util.Log;
 
 public class RNFingerprintIdentifyModule extends ReactContextBaseJavaModule implements LifecycleEventListener {
 
+  private static final int MAX_ATTEMPTS = 5;
   private final ReactApplicationContext reactContext;
   private FingerprintIdentify mFingerprintIdentify = null;
 
@@ -60,7 +61,7 @@ public class RNFingerprintIdentifyModule extends ReactContextBaseJavaModule impl
     }
 
     mFingerprintIdentify.resumeIdentify();
-    mFingerprintIdentify.startIdentify(6, new BaseFingerprint.FingerprintIdentifyListener() {
+    mFingerprintIdentify.startIdentify(MAX_ATTEMPTS, new BaseFingerprint.FingerprintIdentifyListener() {
       @Override
       public void onSucceed() {
         // succeed, release hardware automatically
