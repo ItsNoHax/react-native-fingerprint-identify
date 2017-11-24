@@ -57,6 +57,7 @@ public class RNFingerprintIdentifyModule extends ReactContextBaseJavaModule impl
 
     if(!isSensorAvailable()) {
       sendEvent("failed", "ERROR_NOT_AVAILABLE");
+      RNFingerprintIdentifyModule.this.cancelIdentify();
       return;
     }
 
@@ -66,6 +67,7 @@ public class RNFingerprintIdentifyModule extends ReactContextBaseJavaModule impl
       public void onSucceed() {
         // succeed, release hardware automatically
         sendEvent("ok", null);
+        RNFingerprintIdentifyModule.this.cancelIdentify();
       }
 
       @Override
@@ -78,14 +80,18 @@ public class RNFingerprintIdentifyModule extends ReactContextBaseJavaModule impl
       public void onFailed() {
         // failed, release hardware automatically
         sendEvent("failed", "ERROR_NOT_MATCH");
+        RNFingerprintIdentifyModule.this.cancelIdentify();
       }
     });
   }
 
   @ReactMethod
   public void cancelIdentify() {
-    mFingerprintIdentify.cancelIdentify();
-    reactContext.removeLifecycleEventListener(this);
+    if (mFingerprintIdentify != null) {
+      mFingerprintIdentify.cancelIdentify();
+      mFingerprintIdentify = null;
+      reactContext.removeLifecycleEventListener(this);
+    }
   }
 
   @ReactMethod
