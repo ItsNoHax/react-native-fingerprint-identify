@@ -2,6 +2,7 @@
 package com.fingerprint.identify;
 
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
@@ -15,7 +16,7 @@ import com.wei.android.lib.fingerprintidentify.base.BaseFingerprint;
 import android.app.Activity;
 import android.util.Log;
 
-public class RNFingerprintIdentifyModule extends ReactContextBaseJavaModule {
+public class RNFingerprintIdentifyModule extends ReactContextBaseJavaModule implements LifecycleEventListener {
 
   private final ReactApplicationContext reactContext;
   private FingerprintIdentify mFingerprintIdentify = null;
@@ -36,8 +37,10 @@ public class RNFingerprintIdentifyModule extends ReactContextBaseJavaModule {
       if(this.mFingerprintIdentify == null) {
         this.mFingerprintIdentify = new FingerprintIdentify(currentActivity, new BaseFingerprint.FingerprintIdentifyExceptionListener() {
     Activity currentActivity = getCurrentActivity();
+        reactContext.addLifecycleEventListener(this);
           @Override
           public void onCatchException(Throwable exception) {
+            reactContext.removeLifecycleEventListener(RNFingerprintIdentifyModule.this);
             Log.d("ReactNative", "ERROR FINGERPRINT: " + exception.getLocalizedMessage());
           }
         });
@@ -81,6 +84,7 @@ public class RNFingerprintIdentifyModule extends ReactContextBaseJavaModule {
   @ReactMethod
   public void cancelIdentify() {
     mFingerprintIdentify.cancelIdentify();
+    reactContext.removeLifecycleEventListener(this);
   }
 
   @ReactMethod
@@ -133,5 +137,24 @@ public class RNFingerprintIdentifyModule extends ReactContextBaseJavaModule {
        response.putString("status", status);
        response.putString("error", message);
        promise.resolve(response);
+  }
+
+  @Override
+  public void onHostResume() {
+    if (mFingerprintIdentify != null) {
+      mFingerprintIdentify.resumeIdentify();
+    }
+  }
+
+  @Override
+  public void onHostPause() {
+    if (mFingerprintIdentify != null) {
+      mFingerprintIdentify.cancelIdentify();
+    }
+  }
+
+  @Override
+  public void onHostDestroy() {
+    this.cancelIdentify();
   }
 }
